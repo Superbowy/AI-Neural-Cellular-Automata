@@ -1,5 +1,4 @@
 import time
-import random
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,6 +19,7 @@ def train(model: NeuralCellularAutomata, pt: Pattern, epochs, batch_size, lr):
 
     loss_fn = nn.MSELoss(reduction="none") # Reduction none so we can replace the correct outputs later on
     optimizer = torch.optim.Adam(params=model.parameters(), lr=lr)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, [1500], 0.25)
 
     start_time = time.time()
     target = torch.tensor(pt.data, device=DEVICE, dtype=torch.float32)
@@ -50,7 +50,8 @@ def train(model: NeuralCellularAutomata, pt: Pattern, epochs, batch_size, lr):
         utils.normalize_grads(model)
         optimizer.step()
         optimizer.zero_grad()
-
+        scheduler.step()
+            
         results = y_pred.detach()
         results[torch.argmax(loss_per_batch)] = init
         pool[idxs] = results
@@ -66,8 +67,8 @@ def run():
     PT0 = Pattern(EMOJI)
 
     BATCH_SIZE = 8
-    EPOCHS = 1000
-    LR = 0.001
+    EPOCHS = 2000
+    LR = 0.002
 
     train(NCA0, PT0, EPOCHS, BATCH_SIZE, LR)
 

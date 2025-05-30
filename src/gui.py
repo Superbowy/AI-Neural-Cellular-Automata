@@ -1,26 +1,21 @@
 import numpy as np
 from math import floor
-import time
 import pygame
 import torch
 
 from config import DEVICE, GRID_SIZE
 from NeuralCellularAutomata import NeuralCellularAutomata
 
-# Config
 DISPLAY_SCALE = 10
 FPS = 10
 
-# Model setup
 NCA0 = NeuralCellularAutomata().to(DEVICE)
-NCA0.load_state_dict(torch.load("../NCA0_mage_2000.pth", map_location=DEVICE))
+NCA0.load_state_dict(torch.load("../models/NCA0_lizard_2000.pth", map_location=DEVICE))
 NCA0.eval()
 
-# Init grid
 state = torch.zeros((1, 16, GRID_SIZE, GRID_SIZE), dtype=torch.float32, device=DEVICE)
 state[:, :, GRID_SIZE // 2, GRID_SIZE // 2] = 1.0
 
-# Init pygame
 pygame.init()
 screen = pygame.display.set_mode((GRID_SIZE * DISPLAY_SCALE, GRID_SIZE * DISPLAY_SCALE))
 clock = pygame.time.Clock()
