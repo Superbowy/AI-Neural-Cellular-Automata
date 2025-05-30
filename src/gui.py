@@ -1,5 +1,7 @@
-import numpy as np
+import os
 from math import floor
+
+import numpy as np
 import pygame
 import torch
 
@@ -10,7 +12,7 @@ DISPLAY_SCALE = 10
 FPS = 10
 
 NCA0 = NeuralCellularAutomata().to(DEVICE)
-NCA0.load_state_dict(torch.load("../models/NCA0_lizard_2000.pth", map_location=DEVICE))
+NCA0.load_state_dict(torch.load("models/NCA0_mage_2000.pth", map_location=DEVICE))
 NCA0.eval()
 
 state = torch.zeros((1, 16, GRID_SIZE, GRID_SIZE), dtype=torch.float32, device=DEVICE)
@@ -23,17 +25,17 @@ clock = pygame.time.Clock()
 paused = False
 running = True
 
+
 def zero_circle(grid, center_x, center_y):
     radius = GRID_SIZE / 16
     _, C, H, W = grid.shape
     yy, xx = torch.meshgrid(
-        torch.arange(H, device=DEVICE),
-        torch.arange(W, device=DEVICE),
-        indexing="ij"
+        torch.arange(H, device=DEVICE), torch.arange(W, device=DEVICE), indexing="ij"
     )
-    mask = ((xx - center_x) ** 2 + (yy - center_y) ** 2) <= radius ** 2  # (H, W)
+    mask = ((xx - center_x) ** 2 + (yy - center_y) ** 2) <= radius**2  # (H, W)
     grid[0, :, mask] = 0.0
     grid[0, 3, mask] = 1.0
+
 
 while running:
     if not paused:
@@ -48,8 +50,10 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mx, my = pygame.mouse.get_pos()
             gx = floor(mx / DISPLAY_SCALE)
-            gy =floor(my / DISPLAY_SCALE)
-            zero_circle(state, gy, gx) #-> gy and gy are reversed because we transpose after
+            gy = floor(my / DISPLAY_SCALE)
+            zero_circle(
+                state, gy, gx
+            )  # -> gy and gy are reversed because we transpose after
 
     rgba = state[0, :4].clamp(0, 1).cpu().permute(2, 1, 0).numpy()
     rgba_uint8 = (rgba * 255).astype(np.uint8)
